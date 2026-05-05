@@ -1,0 +1,270 @@
+{
+  "name": "task_3",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Aggregate').item }}",
+        "options": {
+          "systemMessage": "Ты — автоматизированный ассистент, который собирает информацию, анализирует и создает структурированные текстовые сводки. Твоя задача: по предоставленной информации создать дайджест.\n\nТребования к формату итогового дайджеста: Строго соблюдай следующую структуру в финальном сообщении:\n\n📊 Дайджест за [ДД.ММ.ГГГГ]\n\nОбщее резюме дня: [Напиши один связный абзац (3-5 предложений), который суммирует главные темы, тренды или настроение из всех постов сегодня. Отрази, о чем в целом говорили в отслеживаемых каналах.]\n\nДетали по каналам:\n\nНазвание первого канала — количество отобранных постов:\n1.  Краткое описание поста. Ссылка на пост\n2. Краткое описание поста. Ссылка на пост\n\nНазвание второго канала — количество отобранных постов:\n1.  Краткое описание поста. Ссылка на пост\n\nНазвание третьего канала — количество отобранных постов:\n1.  Краткое описание поста. Ссылка на пост\n\n———\nДополнительные инструкции по стилю:\n\nБудь лаконичным и информативным.\n\nИспользуй нейтральный, деловой тон.\n\nВ кратком описании поста укажи суть, а не просто пересказывай заголовок."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "ba36f59a-b69c-4598-977a-95973d772ea8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "GigaChat/GigaChat-2-Max",
+          "mode": "list",
+          "cachedResultName": "GigaChat/GigaChat-2-Max"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        240
+      ],
+      "id": "f8ef4531-cff8-4bd1-8463-a0e62aaadc2e",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LC64XcDamis5pGXv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://fetchrss.com/feed/1vet8Z8TN9mU1veswW4WU4UV.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        -192
+      ],
+      "id": "034ae844-6538-4118-b0c9-da8119dd7962",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "url": "https://fetchrss.com/feed/1vet8Z8TN9mU1vetAX3COE78.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        0
+      ],
+      "id": "932ea61f-7be2-45a4-8d2a-0eb7d62fbb5e",
+      "name": "RSS Read1"
+    },
+    {
+      "parameters": {
+        "url": "https://fetchrss.com/feed/1vet8Z8TN9mU1vetBcBoNFff.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        192
+      ],
+      "id": "b7bcfcdb-17ab-4d38-ad7e-c89a08c5c1a8",
+      "name": "RSS Read2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -176,
+        -16
+      ],
+      "id": "b4b9ca5a-1c04-47c2-811f-fe1d6c0b77af",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "={{ $json.title }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        32,
+        0
+      ],
+      "id": "1a41afa5-14d1-422f-aa8b-751dd2b5ef1e",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "chatId": "-1003168606347",
+        "text": "= {{ $json.output }} ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        0
+      ],
+      "id": "255fe002-d0c4-4d28-a6c7-2af774ec37eb",
+      "name": "Send a text message",
+      "webhookId": "048966db-695b-4fd4-8cfb-b9a85649a321",
+      "credentials": {
+        "telegramApi": {
+          "id": "ToT2eF9wAAUVr5uy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -784,
+        0
+      ],
+      "id": "9e6b97c5-0155-4eea-8235-f6db024bb121",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ae852e9b-9dec-4c78-9e3f-a182173c9bc5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f8e5e1f7a44fcb620ffe32093f4e49a23e53ff3e96860793278624590070c95d"
+  },
+  "id": "KJBXIwQlwZJZjtwJ",
+  "tags": []
+}
