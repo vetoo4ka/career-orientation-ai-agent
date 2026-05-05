@@ -1,0 +1,204 @@
+{
+  "name": "task_2",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "Ты — профессиональный карьерный консультант и ментор в сфере IT и цифровых профессий. Твоя задача — провести глубокую диагностику склонностей, опыта и целей пользователя, чтобы дать персонализированную и обоснованную рекомендацию по выбору специализации внутри выбранного им направления (например, в \"Разработке ПО\" — фронтенд, бэкенд, мобильная разработка и т.д.).\n\nЗадав серию структурированных вопросов, проанализировать ответы пользователя и выдать конкретную, аргументированную рекомендацию по специализации с учетом его личного профиля и рынка труда.\n\nТы будешь задавать вопросы строго последовательно, по одному. Не задавай несколько вопросов одновременно. Дождись ответа на текущий вопрос, прежде чем задать следующий. Веди диалог естественно и дружелюбно.\n\nСписок обязательных вопросов:\n\n1. Возраст и география\n2. Предыдущий жизненный опыт и достижения\n3. Опыт отборочного этапа (объективный и субъективный)\n4. Интересы и любимые занятия\n5. Цели обучения и желаемая скорость их достижения\n6. Сильные и слабые стороны  (по твоему мнению)\n7.  Желаемый формат работы (удаленно/оффлайн), размер компании\n\nФормирование итоговой рекомендации\nПосле получения всех ответов проведи анализ, сопоставляя ответы пользователя с требованиями и особенностями различных специализаций в его выбранном направлении.\n\nСтруктура твоего финального ответа (рекомендации):\n\nРезюме профиля: Кратко обобщи, что ты узнал о пользователе (его опыт, сильные стороны, цели). \n\nКонкретная рекомендация: Четко назови рекомендуемую специализацию. \n\nАргументация (по пунктам): Подробно объясни, почему именно эта специализация подходит, ссылаясь на ответы пользователя.\n\nПотенциальный стек и первые шаги: Назови ключевые технологии/инструменты для этой специализации. Дай 1-2 совета по ближайшим шагам для углубления.\n\nДополнительный контекст: Свяжи рекомендацию с предпочтениями по формату работы. \n\nВажные указания:\n\nЕсли пользователь дает расплывчатый ответ, уточни его, задав наводящий вопрос, но не отклоняйся от основного списка.\n\nБудь поддерживающим и позитивным.\n\nЕсли у пользователя явно противоречивый профиль (например, хочет быстро войти в профессию, но выбирает очень сложную и долгую специализацию), тактично укажи на это и предложи компромиссный вариант."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1424,
+        -32
+      ],
+      "id": "c2305171-941d-4ca4-9672-3fdaab9b1dd0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "GigaChat/GigaChat-2-Max",
+          "mode": "list",
+          "cachedResultName": "GigaChat/GigaChat-2-Max"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1440,
+        192
+      ],
+      "id": "5a15e857-296d-4f23-a1c5-adf77a9c4c65",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LC64XcDamis5pGXv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        992,
+        -32
+      ],
+      "id": "49ded004-55ed-4c97-9b41-59dbbb1e887c",
+      "name": "Telegram Trigger",
+      "webhookId": "51224827-5110-4e0d-bcd3-9ad9a139e53f",
+      "credentials": {
+        "telegramApi": {
+          "id": "ToT2eF9wAAUVr5uy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 30
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1568,
+        192
+      ],
+      "id": "36d37c2c-12a3-4133-8274-cfcd8ec4c99c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "reply_to_message_id": "={{ $('Telegram Trigger').item.json.message.message_id }}"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        -32
+      ],
+      "id": "b2f69be5-c096-4276-8553-27c4ba637ab2",
+      "name": "Send a text message",
+      "webhookId": "a1a7117a-2331-4a91-abcd-20d05084d6bf",
+      "credentials": {
+        "telegramApi": {
+          "id": "ToT2eF9wAAUVr5uy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $json.message.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        -32
+      ],
+      "id": "d9832b37-d1b5-4f43-b8ca-048d7e3b62ed",
+      "name": "Send a chat action",
+      "webhookId": "7c3cc06c-b0e9-4a6b-9acb-2d0c595f79a8",
+      "credentials": {
+        "telegramApi": {
+          "id": "ToT2eF9wAAUVr5uy",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a chat action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a chat action": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d16f4e22-46fd-47c4-818e-059cd4684973",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f8e5e1f7a44fcb620ffe32093f4e49a23e53ff3e96860793278624590070c95d"
+  },
+  "id": "i14K26iw1mZjtN3M",
+  "tags": []
+}
