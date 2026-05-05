@@ -1,0 +1,178 @@
+{
+  "name": "task_4",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.items }}",
+        "options": {
+          "systemMessage": "Ты — аналитик рынка труда. Твоя задача — Определить ТОП-15 самых частых требований/навыков среди всех обработанных вакансий. Подсчитай, сколько раз каждый из них встречался.\n\nФормат вывода:\n\nНа этой неделе я спарсил N свежих вакансий по выбранному тобой направлению. Самыми популярными являются следующие требования:\n\nтребование 1: количество раз\n\nтребование 2: количество раз\n\nтребование 3: количество раз\n\n…\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "dedeba38-0877-40e9-bfcf-0df76a206219",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "MiniMaxAI/MiniMax-M2",
+          "mode": "list",
+          "cachedResultName": "MiniMaxAI/MiniMax-M2"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        176
+      ],
+      "id": "467a64f7-3e41-4ea7-ba9f-b748889d6daf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "LC64XcDamis5pGXv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.hh.ru/vacancies",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "QA"
+            },
+            {
+              "name": "area",
+              "value": "1"
+            },
+            {
+              "name": "per_page",
+              "value": "7"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        32,
+        0
+      ],
+      "id": "436ccbcf-c063-434a-8e61-69dd37b2b648",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtHour": 18
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        0
+      ],
+      "id": "88b79c8d-5a22-4180-acfa-18c9d88e8090",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "-1003168606347",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "7a2ca457-9091-4b34-8bb2-ca3365031488",
+      "name": "Send a text message",
+      "webhookId": "49723ef3-772d-4add-9963-7f9c5f38495a",
+      "credentials": {
+        "telegramApi": {
+          "id": "ToT2eF9wAAUVr5uy",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d56fc27b-8ee9-46b7-b50b-1b7b1a60e0d3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f8e5e1f7a44fcb620ffe32093f4e49a23e53ff3e96860793278624590070c95d"
+  },
+  "id": "3LnQc3oWG0LjvyCp",
+  "tags": []
+}
